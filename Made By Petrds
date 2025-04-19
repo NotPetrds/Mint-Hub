@@ -6,7 +6,7 @@ local gui = Instance.new("ScreenGui", LP.PlayerGui)
 local frame = Instance.new("Frame", gui)
 local espBtn = Instance.new("TextButton", frame)
 local flyBtn = Instance.new("TextButton", frame)
-local speedLabel = Instance.newbem("TextLabel", frame)
+local speedLabel = Instance.new("TextLabel", frame)
 local speedSlider = Instance.new("TextButton", frame)
 local flingBox = Instance.new("TextBox", frame)
 local flingBtn = Instance.new("TextButton", frame)
@@ -149,7 +149,7 @@ LP.CharacterAdded:Connect(function(c)
     h.WalkSpeed = tonumber(speedLabel.Text:match("%d+")) or 16
 end)
 
--- Fling Function
+-- Fling Functions
 local function startFling()
     local targetName = flingBox.Text
     local targetPlayer = Players:FindFirstChild(targetName)
@@ -181,14 +181,14 @@ local function startFling()
         humanoid.PlatformStand = true -- Prevent movement interference
     end
     local bav = Instance.new("BodyAngularVelocity", localRoot)
-    bav.MaxTorque = Vector3.new(0, 1e6, 0) -- Increased torque for stronger fling
-    bav.AngularVelocity = Vector3.new(0, 5000, 0) -- Extremely fast spin
+    bav.MaxTorque = Vector3.new(0, 1e6, 0) -- High torque for strong fling
+    bav.AngularVelocity = Vector3.new(0, 6000, 0) -- Increased spin speed
     flingConn = RunService.RenderStepped:Connect(function()
         if flingOn and targetRoot.Parent and localRoot.Parent then
             -- Continuously teleport to target
-            localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -1.5) -- Stay close to target
+            localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -1.5) -- Stay close
             -- Ensure collision
-            localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 100 -- Increased velocity
+            localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 150 -- Increased velocity
         else
             -- Stop if target or local character is gone
             stopFling()
