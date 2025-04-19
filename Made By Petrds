@@ -1,49 +1,118 @@
-local P = game:GetService("Players")
-local U = game:GetService("UserInputService")
-local LP = P.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Parent = game.StarterGui
-gui.ResetOnSpawn = false
-game:GetService("RunService").Stepped:Wait() -- Ensure GUI loads
-gui.Parent = game.CoreGui
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
-local f = Instance.new("Frame", gui)
-local esp = Instance.new("TextButton", f)
-local fly = Instance.new("TextButton", f)
-local spdL = Instance.new("TextLabel", f)
-local spdS = Instance.new("TextButton", f)
-local flingT = Instance.new("TextBox", f)
-local flingB = Instance.new("TextButton", f)
-local espOn, flyOn, hl, flyC = false, false, {}, nil
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
 
-f.Size, f.Position, f.BackgroundColor3, f.Active = UDim2.new(0, 140, 0, 150), UDim2.new(0.1, 0, 0.1, 0), Color3.new(0.2, 0.2, 0.2), true
-esp.Size, esp.Position, esp.Text, esp.BackgroundColor3, esp.TextColor3 = UDim2.new(0, 60, 0, 25), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
-fly.Size, fly.Position, fly.Text, fly.BackgroundColor3, fly.TextColor3 = UDim2.new(0, 60, 0, 25), UDim2.new(0, 70, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
-spdL.Size, spdL.Position, spdL.Text, spdL.BackgroundTransparency, spdL.TextColor3 = UDim2.new(0, 120, 0, 20), UDim2.new(0, 10, 0, 45), "Speed: 16", 1, Color3.new(1, 1, 1)
-spdS.Size, spdS.Position, spdS.Text, spdS.BackgroundColor3 = UDim2.new(0, 120, 0, 15), UDim2.new(0, 10, 0, 70), "", Color3.new(0.6, 0.6, 0.6)
-flingT.Size, flingT.Position, flingT.PlaceholderText, flingT.BackgroundColor3, flingT.TextColor3 = UDim2.new(0, 80, 0, 25), UDim2.new(0, 10, 0, 95), "Username", Color3.new(0.5, 0.5, 0.5), Color3.new(1, 1, 1)
-flingB.Size, flingB.Position, flingB.Text, flingB.BackgroundColor3, flingB.TextColor3 = UDim2.new(0, 40, 0, 25), UDim2.new(0, 90, 0, 95), "Fling", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
+local flying = false
+local flySpeed = 50
+local bodyVelocity = nil
+local bodyGyro = nil
 
-local dragging, dragStart, startPos
-f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging, dragStart, startPos = true, i.Position, f.Position end end)
-f.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then local d = i.Position - dragStart f.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y) end end)
-f.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player.PlayerGui
+screenGui.Name = "FlyGUI"
 
-local function addHL(c) if not hl[c] then local h = Instance.new("Highlight", c) h.Adornee, h.OutlineColor, h.OutlineTransparency, h.FillTransparency = c, Color3.new(1, 0, 0), 0, 1 hl[c] = h end end
-local function remHL(c) if hl[c] then hl[c]:Destroy() hl[c] = nil end end
-local function toggleESP() espOn = not espOn esp.Text = espOn and "ESP: ON" or "ESP: OFF" for _, p in pairs(P:GetPlayers()) do if p ~= LP and p.Character then if espOn then addHL(p.Character) else remHL(p.Character) end end end if espOn then for _, p in pairs(P:GetPlayers()) do if p ~= LP then p.CharacterAdded:Connect(function(c) if espOn then addHL(c) end end) end end P.PlayerAdded:Connect(function(p) if p ~= LP then p.CharacterAdded:Connect(function(c) if espOn then addHL(c) end end) if p.Character then addHL(p.Character) end end) end end
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 150, 0, 50)
+frame.Position = UDim2.new(0.5, -75, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
 
-local function startFly() local c = LP.Character if not c or not c:FindFirstChild("HumanoidRootPart") then return end local r = c.HumanoidRootPart local bv = Instance.new("BodyVelocity", r) bv.MaxForce, bv.Velocity = Vector3.new(1e5, 1e5, 1e5), Vector3.new() local bg = Instance.new("BodyGyro", r) bg.MaxTorque, bg.CFrame = Vector3.new(1e5, 1e5, 1e5), r.CFrame flyC = game:GetService("RunService").RenderStepped:Connect(function() local cam = workspace.CurrentCamera local dir = Vector3.new() if U:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end if U:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end if U:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end if U:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end if U:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end if U:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end bv.Velocity, bg.CFrame = dir * 50, cam.CFrame end) end
-local function stopFly() if flyC then flyC:Disconnect() flyC = nil end local c = LP.Character if c and c:FindFirstChild("HumanoidRootPart") then local r = c.HumanoidRootPart for _, v in pairs(r:GetChildren()) do if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then v:Destroy() end end end end
-local function toggleFly() flyOn = not flyOn fly.Text = flyOn and "Fly: ON" or "Fly: OFF" if flyOn then startFly() LP.CharacterAdded:Connect(function() if flyOn then stopFly() startFly() end end) else stopFly() end end
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 100, 0, 30)
+button.Position = UDim2.new(0.5, -50, 0.5, -15)
+button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Text = "Toggle Fly"
+button.Parent = frame
 
-local function updateSpeed(i) local pos = math.clamp((i.Position.X - spdS.AbsolutePosition.X) / spdS.AbsoluteSize.X, 0, 1) local s = 16 + pos * 84 spdL.Text = "Speed: " .. math.floor(s) if LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid.WalkSpeed = s end end
-spdS.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then updateSpeed(i) local c c = U.InputChanged:Connect(function(e) if e == i and e.UserInputState == Enum.UserInputState.Change then updateSpeed(e) elseif e == i and e.UserInputState == Enum.UserInputState.End then c:Disconnect() end end) end end)
-LP.CharacterAdded:Connect(function(c) local h = c:WaitForChild("Humanoid") h.WalkSpeed = tonumber(spdL.Text:match("%d+")) or 16 end)
+local function setupFly()
+    if not humanoidRootPart or not humanoid then return end
 
-local function flingPlayer() local name = flingT.Text:match("^%s*(.-)%s*$") local p = P:FindFirstChild(name) if p and p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then local r = p.Character.HumanoidRootPart local bv = Instance.new("BodyVelocity", r) bv.MaxForce, bv.Velocity = Vector3.new(1e5, 1e5, 1e5), Vector3.new(0, 1000, 0) game:GetService("Debris"):AddItem(bv, 0.1) end end
-flingB.MouseButton1Click:Connect(flingPlayer)
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = humanoidRootPart
 
-esp.MouseButton1Click:Connect(toggleESP)
-fly.MouseButton1Click:Connect(toggleFly)
-if LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid.WalkSpeed = 16 end
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+    bodyGyro.CFrame = humanoidRootPart.CFrame
+    bodyGyro.Parent = humanoidRootPart
+
+    humanoid.PlatformStand = true
+end
+
+local function removeFly()
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    if bodyGyro then
+        bodyGyro:Destroy()
+        bodyGyro = nil
+    end
+    humanoid.PlatformStand = false
+end
+
+local function updateFly()
+    if not flying or not humanoidRootPart then return end
+
+    local moveDirection = Vector3.new(0, 0, 0)
+    local camera = workspace.CurrentCamera
+    local lookDirection = camera.CFrame.LookVector
+
+    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+        moveDirection = moveDirection + lookDirection
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+        moveDirection = moveDirection - lookDirection
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+        moveDirection = moveDirection + camera.CFrame.RightVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+        moveDirection = moveDirection - camera.CFrame.RightVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+        moveDirection = moveDirection + Vector3.new(0, 1, 0)
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+        moveDirection = moveDirection - Vector3.new(0, 1, 0)
+    end
+
+    bodyVelocity.Velocity = moveDirection * flySpeed
+    bodyGyro.CFrame = camera.CFrame
+end
+
+button.MouseButton1Click:Connect(function()
+    flying = not flying
+    if flying then
+        setupFly()
+        button.Text = "Fly: ON"
+        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        removeFly()
+        button.Text = "Fly: OFF"
+        button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if flying then
+        updateFly()
+    end
+end)
+
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoid = character:WaitForChild("Humanoid")
+    if flying then
+        setupFly()
+    end
+end)
