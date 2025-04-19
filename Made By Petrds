@@ -1,18 +1,21 @@
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 local gui = Instance.new("ScreenGui", LP.PlayerGui)
 local frame = Instance.new("Frame", gui)
 local espBtn = Instance.new("TextButton", frame)
 local flyBtn = Instance.new("TextButton", frame)
-local speedLabel = Instance.new("TextLabel", frame)
+local speedLabel = Instance.newbem("TextLabel", frame)
 local speedSlider = Instance.new("TextButton", frame)
 local flingBox = Instance.new("TextBox", frame)
 local flingBtn = Instance.new("TextButton", frame)
 local espOn = false
 local flyOn = false
+local flingOn = false
 local hl = {}
 local flyConn
+local flingConn
 local dragging, dragStart, startPos
 
 -- GUI Setup
@@ -25,7 +28,7 @@ flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextC
 speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3, speedLabel.Visible, speedLabel.ZIndex = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1), true, 1
 speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3, speedSlider.Visible, speedSlider.ZIndex = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1), true, 1
 flingBox.Size, flingBox.Position, flingBox.Text, flingBox.BackgroundColor3, flingBox.TextColor3, flingBox.PlaceholderText, flingBox.Visible, flingBox.ZIndex = UDim2.new(0, 90, 0, 30), UDim2.new(0, 10, 0, 110), "", Color3.new(0.3, 0.3, 0.3), Color3.new(1, 1, 1), "Player Name", true, 1
-flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3, flingBtn.Visible, flingBtn.ZIndex = UDim2.new(0, 30, 0, 30), UDim2.new(0, 110, 0, 110), "Fling", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3, flingBtn.Visible, flingBtn.ZIndex = UDim2.new(0, 30, 0, 30), UDim2.new(0, 110, 0, 110), "Fling: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
 
 -- Debug print to confirm fling elements creation
 print("Fling TextBox and Button created: ", flingBox, flingBtn)
@@ -87,7 +90,7 @@ local function startFly()
     bv.MaxForce, bv.Velocity = Vector3.new(1e5, 1e5, 1e5), Vector3.new(0, 0, 0)
     local bg = Instance.new("BodyGyro", r)
     bg.MaxTorque, bg.CFrame = Vector3.new(1e5, 1e5, 1e5), r.CFrame
-    flyConn = game:GetService("RunService").RenderStepped:Connect(function()
+    flyConn = RunService.RenderStepped:Connect(function()
         local cam = workspace.CurrentCamera
         local dir = Vector3.new(0, 0, 0)
         if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
@@ -110,7 +113,7 @@ local function stopFly()
 end
 local function toggleFly()
     flyOn = not flyOn
-    flyBtn.Text = flyOn and "Fly: OFF" or "Fly: OFF"
+    flyBtn.Text = flyOn and "Fly: ON" or "Fly: OFF"
     if flyOn then
         startFly()
         LP.CharacterAdded:Connect(function() if flyOn then stopFly() startFly() end end)
@@ -147,53 +150,92 @@ LP.CharacterAdded:Connect(function(c)
 end)
 
 -- Fling Function
-local function flingPlayer()
+local function startFling()
     local targetName = flingBox.Text
     local targetPlayer = Players:FindFirstChild(targetName)
     if not targetPlayer then
         flingBox.Text = "Player not found"
         wait(1)
         flingBox.Text = ""
-        return
+        return false
     end
     if targetPlayer == LP then
         flingBox.Text = "Cannot fling self"
         wait(1)
         flingBox.Text = ""
-        return
+        return false
     end
-    local targetChar = targetPlayer.Character
+    local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
     local localChar = LP.Character
     if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") or not localChar or not localChar:FindFirstChild("HumanoidRootPart") then
         flingBox.Text = "No character"
         wait(1)
         flingBox.Text = ""
-        return
+        return false
     end
-    -- Teleport to target player
+    -- Start continuous fling
     local targetRoot = targetChar.HumanoidRootPart
     local localRoot = localChar.HumanoidRootPart
-    localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -2) -- Position slightly in front of target
-    -- Disable local player's collision to avoid getting stuck
     local humanoid = localChar:FindFirstChild("Humanoid")
     if humanoid then
         humanoid.PlatformStand = true -- Prevent movement interference
     end
-    -- Spin at breakneck speeds
     local bav = Instance.new("BodyAngularVelocity", localRoot)
-    bav.MaxTorque = Vector3.new(0, 1e5, 0) -- Spin around Y-axis
-    bav.AngularVelocity = Vector3.new(0, 1000, 0) -- Extremely fast spin
-    -- Ensure collision with target
-    localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 50 -- Move toward target
-    -- Clean up after 0.5 seconds
-    game:GetService("Debris"):AddItem(bav, 0.5)
-    wait(0.5)
+    bav.MaxTorque = Vector3.new(0, 1e6, 0) -- Increased torque for stronger fling
+    bav.AngularVelocity = Vector3.new(0, 5000, 0) -- Extremely fast spin
+    flingConn = RunService.RenderStepped:Connect(function()
+        if flingOn and targetRoot.Parent and localRoot.Parent then
+            -- Continuously teleport to target
+            localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -1.5) -- Stay close to target
+            -- Ensure collision
+            localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 100 -- Increased velocity
+        else
+            -- Stop if target or local character is gone
+            stopFling()
+        end
+    end)
+    return true
+end
+
+local function stopFling()
+    if flingConn then
+        flingConn:Disconnect()
+        flingConn = nil
+    end
+    local localChar = LP.Character
+    if localChar and localChar:FindFirstChild("HumanoidRootPart") then
+        local localRoot = localChar.HumanoidRootPart
+        if localRoot:FindFirstChild("BodyAngularVelocity") then
+            localRoot.BodyAngularVelocity:Destroy()
+        end
+    end
+    local humanoid = localChar and localChar:FindFirstChild("Humanoid")
     if humanoid then
         humanoid.PlatformStand = false
+    end
+end
+
+local function toggleFling()
+    flingOn = not flingOn
+    flingBtn.Text = flingOn and "Fling: ON" or "Fling: OFF"
+    if flingOn then
+        if startFling() then
+            LP.CharacterAdded:Connect(function()
+                if flingOn then
+                    stopFling()
+                    startFling()
+                end
+            end)
+        else
+            flingOn = false
+            flingBtn.Text = "Fling: OFF"
+        end
+    else
+        stopFling()
     end
 end
 
 -- Button Connections
 espBtn.MouseButton1Click:Connect(toggleESP)
 flyBtn.MouseButton1Click:Connect(toggleFly)
-flingBtn.MouseButton1Click:Connect(flingPlayer)
+flingBtn.MouseButton1Click:Connect(toggleFling)
