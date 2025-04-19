@@ -7,13 +7,17 @@ local esp = Instance.new("TextButton", f)
 local fly = Instance.new("TextButton", f)
 local spdL = Instance.new("TextLabel", f)
 local spdS = Instance.new("TextButton", f)
+local flingT = Instance.new("TextBox", f)
+local flingB = Instance.new("TextButton", f)
 local espOn, flyOn, hl, flyC, drag, dragS, startP = false, false, {}, nil
 
-f.Size, f.Position, f.BackgroundColor3, f.Active = UDim2.new(0, 140, 0, 110), UDim2.new(0.5, -70, 0.5, -55), Color3.new(0.2, 0.2, 0.2), true
+f.Size, f.Position, f.BackgroundColor3, f.Active = UDim2.new(0, 140, 0, 150), UDim2.new(0.5, -70, 0.5, -75), Color3.new(0.2, 0.2, 0.2), true
 esp.Size, esp.Position, esp.Text, esp.BackgroundColor3, esp.TextColor3 = UDim2.new(0, 60, 0, 25), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 fly.Size, fly.Position, fly.Text, fly.BackgroundColor3, fly.TextColor3 = UDim2.new(0, 60, 0, 25), UDim2.new(0, 70, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 spdL.Size, spdL.Position, spdL.Text, spdL.BackgroundTransparency, spdL.TextColor3 = UDim2.new(0, 120, 0, 20), UDim2.new(0, 10, 0, 45), "Speed: 16", 1, Color3.new(1, 1, 1)
 spdS.Size, spdS.Position, spdS.Text, spdS.BackgroundColor3 = UDim2.new(0, 120, 0, 15), UDim2.new(0, 10, 0, 70), "", Color3.new(0.6, 0.6, 0.6)
+flingT.Size, flingT.Position, flingT.PlaceholderText, flingT.BackgroundColor3, flingT.TextColor3 = UDim2.new(0, 80, 0, 25), UDim2.new(0, 10, 0, 95), "Username", Color3.new(0.5, 0.5, 0.5), Color3.new(1, 1, 1)
+flingB.Size, flingB.Position, flingB.Text, flingB.BackgroundColor3, flingB.TextColor3 = UDim2.new(0, 40, 0, 25), UDim2.new(0, 90, 0, 95), "Fling", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 
 f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag, dragS, startP = true, i.Position, f.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then drag = false end end) end end)
 f.InputChanged:Connect(function(i) if drag and i.UserInputType == Enum.UserInputType.MouseMovement then local d = i.Position - dragS f.Position = UDim2.new(startP.X.Scale, startP.X.Offset + d.X, startP.Y.Scale, startP.Y.Offset + d.Y) end end)
@@ -29,6 +33,9 @@ local function toggleFly() flyOn = not flyOn fly.Text = flyOn and "Fly: ON" or "
 local function updateSpeed(i) local pos = math.clamp((i.Position.X - spdS.AbsolutePosition.X) / spdS.AbsoluteSize.X, 0, 1) local s = 16 + (pos * 84) spdL.Text = "Speed: " .. math.floor(s) if LP.Character and LP.Character.Humanoid then LP.Character.Humanoid.WalkSpeed = s end end
 spdS.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then updateSpeed(i) local c c = i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.Change then updateSpeed(i) elseif i.UserInputState == Enum.UserInputState.End then c:Disconnect() end end) end end)
 LP.CharacterAdded:Connect(function(c) c:WaitForChild("Humanoid").WalkSpeed = tonumber(spdL.Text:match("%d+")) or 16 end)
+
+local function flingPlayer() local name = flingT.Text local p = P:FindFirstChild(name) if p and p.Character and p.Character.HumanoidRootPart then local r = p.Character.HumanoidRootPart local bv = Instance.new("BodyVelocity", r) bv.MaxForce, bv.Velocity = Vector3.new(1e5, 1e5, 1e5), Vector3.new(0, 1000, 0) game:GetService("Debris"):AddItem(bv, 0.1) end end
+flingB.MouseButton1Click:Connect(flingPlayer)
 
 esp.MouseButton1Click:Connect(toggleESP)
 fly.MouseButton1Click:Connect(toggleFly)
