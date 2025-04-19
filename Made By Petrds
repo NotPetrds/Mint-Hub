@@ -4,11 +4,11 @@ local LP = Players.LocalPlayer
 local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local frame = Instance.new("Frame", gui)
 local espBtn = Instance.new("TextButton", frame)
-local flyBtn = Instance.new("TextButton", frame)
+local flingBtn = Instance.new("TextButton", frame)
 local speedLabel = Instance.new("TextLabel", frame)
 local speedSlider = Instance.new("TextButton", frame)
 local flingBox = Instance.new("TextBox", frame)
-local flingBtn = Instance.new("TextButton", frame)
+local flyBtn = Instance.new("TextButton", frame)
 local espOn = false
 local flyOn = false
 local hl = {}
@@ -16,15 +16,19 @@ local flyConn
 local dragging, dragStart, startPos
 
 -- GUI Setup
-frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 170), UDim2.new(0.5, -75, 0.5, -85), Color3.new(0.2, 0.2, 0.2)
-frame.Active, frame.Draggable = true, true
+gui.Enabled = true
+frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 180), UDim2.new(0.5, -75, 0.5, -90), Color3.new(0.2, 0.2, 0.2)
+frame.Active, frame.Draggable, frame.Visible = true, true, true
 
-espBtn.Size, espBtn.Position, espBtn.Text, espBtn.BackgroundColor3, espBtn.TextColor3 = UDim2.new(0, 65, 0, 30), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
-flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextColor3 = UDim2.new(0, 65, 0, 30), UDim2.new(0, 75, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
-speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3 = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1)
-speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3 = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1)
-flingBox.Size, flingBox.Position, flingBox.Text, flingBox.BackgroundColor3, flingBox.TextColor3, flingBox.PlaceholderText = UDim2.new(0, 90, 0, 30), UDim2.new(0, 10, 0, 110), "", Color3.new(0.3, 0.3, 0.3), Color3.new(1, 1, 1), "Player Name"
-flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3 = UDim2.new(0, 30, 0, 30), UDim2.new(0, 110, 0, 110), "Fling", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
+espBtn.Size, espBtn.Position, espBtn.Text, espBtn.BackgroundColor3, espBtn.TextColor3, espBtn.Visible, espBtn.ZIndex = UDim2.new(0, 65, 0, 30), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextColor3, flyBtn.Visible, flyBtn.ZIndex = UDim2.new(0, 65, 0, 30), UDim2.new(0, 75, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3, speedLabel.Visible, speedLabel.ZIndex = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1), true, 1
+speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3, speedSlider.Visible, speedSlider.ZIndex = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1), true, 1
+flingBox.Size, flingBox.Position, flingBox.Text, flingBox.BackgroundColor3, flingBox.TextColor3, flingBox.PlaceholderText, flingBox.Visible, flingBox.ZIndex = UDim2.new(0, 90, 0, 30), UDim2.new(0, 10, 0, 110), "", Color3.new(0.3, 0.3, 0.3), Color3.new(1, 1, 1), "Player Name", true, 1
+flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3, flingBtn.Visible, flingBtn.ZIndex = UDim2.new(0, 30, 0, 30), UDim2.new(0, 110, 0, 110), "Fling", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+
+-- Debug print to confirm fling elements creation
+print("Fling TextBox and Button created: ", flingBox, flingBtn)
 
 -- Draggable GUI
 frame.InputBegan:Connect(function(input)
