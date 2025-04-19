@@ -1,14 +1,14 @@
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local LP = Players.LocalPlayer
-local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local gui = Instance.new("ScreenGui", LP.PlayerGui)
 local frame = Instance.new("Frame", gui)
 local espBtn = Instance.new("TextButton", frame)
-local flingBtn = Instance.new("TextButton", frame)
+local flyBtn = Instance.new("TextButton", frame)
 local speedLabel = Instance.new("TextLabel", frame)
 local speedSlider = Instance.new("TextButton", frame)
 local flingBox = Instance.new("TextBox", frame)
-local flyBtn = Instance.new("TextButton", frame)
+local flingBtn = Instance.new("TextButton", frame)
 local espOn = false
 local flyOn = false
 local hl = {}
@@ -110,7 +110,7 @@ local function stopFly()
 end
 local function toggleFly()
     flyOn = not flyOn
-    flyBtn.Text = flyOn and "Fly: ON" or "Fly: OFF"
+    flyBtn.Text = flyOn and "Fly: OFF" or "Fly: OFF"
     if flyOn then
         startFly()
         LP.CharacterAdded:Connect(function() if flyOn then stopFly() startFly() end end)
@@ -163,17 +163,34 @@ local function flingPlayer()
         return
     end
     local targetChar = targetPlayer.Character
-    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then
+    local localChar = LP.Character
+    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") or not localChar or not localChar:FindFirstChild("HumanoidRootPart") then
         flingBox.Text = "No character"
         wait(1)
         flingBox.Text = ""
         return
     end
-    local root = targetChar.HumanoidRootPart
-    local bv = Instance.new("BodyVelocity", root)
-    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    bv.Velocity = Vector3.new(0, 1000, 0) -- Strong upward force
-    game:GetService("Debris"):AddItem(bv, 0.1) -- Remove after 0.1 seconds
+    -- Teleport to target player
+    local targetRoot = targetChar.HumanoidRootPart
+    local localRoot = localChar.HumanoidRootPart
+    localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -2) -- Position slightly in front of target
+    -- Disable local player's collision to avoid getting stuck
+    local humanoid = localChar:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.PlatformStand = true -- Prevent movement interference
+    end
+    -- Spin at breakneck speeds
+    local bav = Instance.new("BodyAngularVelocity", localRoot)
+    bav.MaxTorque = Vector3.new(0, 1e5, 0) -- Spin around Y-axis
+    bav.AngularVelocity = Vector3.new(0, 1000, 0) -- Extremely fast spin
+    -- Ensure collision with target
+    localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 50 -- Move toward target
+    -- Clean up after 0.5 seconds
+    game:GetService("Debris"):AddItem(bav, 0.5)
+    wait(0.5)
+    if humanoid then
+        humanoid.PlatformStand = false
+    end
 end
 
 -- Button Connections
