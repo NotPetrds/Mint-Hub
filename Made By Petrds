@@ -1,0 +1,34 @@
+local P = game:GetService("Players")
+local U = game:GetService("UserInputService")
+local LP = P.LocalPlayer
+local gui = Instance.new("ScreenGui", game.CoreGui)
+local f = Instance.new("Frame", gui)
+local esp = Instance.new("TextButton", f)
+local fly = Instance.new("TextButton", f)
+local spdL = Instance.new("TextLabel", f)
+local spdS = Instance.new("TextButton", f)
+local espOn, flyOn, hl, flyC, drag, dragS, startP = false, false, {}, nil
+
+f.Size, f.Position, f.BackgroundColor3, f.Active = UDim2.new(0, 140, 0, 110), UDim2.new(0.5, -70, 0.5, -55), Color3.new(0.2, 0.2, 0.2), true
+esp.Size, esp.Position, esp.Text, esp.BackgroundColor3, esp.TextColor3 = UDim2.new(0, 60, 0, 25), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
+fly.Size, fly.Position, fly.Text, fly.BackgroundColor3, fly.TextColor3 = UDim2.new(0, 60, 0, 25), UDim2.new(0, 70, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
+spdL.Size, spdL.Position, spdL.Text, spdL.BackgroundTransparency, spdL.TextColor3 = UDim2.new(0, 120, 0, 20), UDim2.new(0, 10, 0, 45), "Speed: 16", 1, Color3.new(1, 1, 1)
+spdS.Size, spdS.Position, spdS.Text, spdS.BackgroundColor3 = UDim2.new(0, 120, 0, 15), UDim2.new(0, 10, 0, 70), "", Color3.new(0.6, 0.6, 0.6)
+
+f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag, dragS, startP = true, i.Position, f.Position i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then drag = false end end) end end)
+f.InputChanged:Connect(function(i) if drag and i.UserInputType == Enum.UserInputType.MouseMovement then local d = i.Position - dragS f.Position = UDim2.new(startP.X.Scale, startP.X.Offset + d.X, startP.Y.Scale, startP.Y.Offset + d.Y) end end)
+
+local function addHL(c) if not hl[c] then local h = Instance.new("Highlight", c) h.Adornee, h.OutlineColor, h.OutlineTransparency, h.FillTransparency = c, Color3.new(1, 0, 0), 0, 1 hl[c] = h end end
+local function remHL(c) if hl[c] then hl[c]:Destroy() hl[c] = nil end end
+local function toggleESP() espOn = not espOn esp.Text = espOn and "ESP: ON" or "ESP: OFF" for _, p in pairs(P:GetPlayers()) do if p ~= LP and p.Character then if espOn then addHL(p.Character) else remHL(p.Character) end end end if espOn then P.PlayerAdded:Connect(function(p) if p ~= LP then p.CharacterAdded:Connect(function(c) if espOn then addHL(c) end end) if p.Character then addHL(p.Character) end end) for _, p in pairs(P:GetPlayers()) do if p ~= LP then p.CharacterAdded:Connect(function(c) if espOn then addHL(c) end end) end end end end
+
+local function startFly() local c = LP.Character if not c or not c.HumanoidRootPart then return end local r = c.HumanoidRootPart local bv = Instance.new("BodyVelocity", r) bv.MaxForce, bv.Velocity = Vector3.new(1e5, 1e5, 1e5), Vector3.new(0, 0, 0) local bg = Instance.new("BodyGyro", r) bg.MaxTorque, bg.CFrame = Vector3.new(1e5, 1e5, 1e5), r.CFrame flyC = game:GetService("RunService").RenderStepped:Connect(function() local cam = workspace.CurrentCamera local dir = Vector3.new(0, 0, 0) if U:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end if U:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end if U:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end if U:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end if U:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end if U:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end bv.Velocity, bg.CFrame = dir * 50, cam.CFrame end) end
+local function stopFly() if flyC then flyC:Disconnect() flyC = nil end local c = LP.Character if c and c.HumanoidRootPart then local r = c.HumanoidRootPart if r:FindFirstChild("BodyVelocity") then r.BodyVelocity:Destroy() end if r:FindFirstChild("BodyGyro") then r.BodyGyro:Destroy() end end end
+local function toggleFly() flyOn = not flyOn fly.Text = flyOn and "Fly: ON" or "Fly: OFF" if flyOn then startFly() LP.CharacterAdded:Connect(function() if flyOn then stopFly() startFly() end end) else stopFly() end end
+
+local function updateSpeed(i) local pos = math.clamp((i.Position.X - spdS.AbsolutePosition.X) / spdS.AbsoluteSize.X, 0, 1) local s = 16 + (pos * 84) spdL.Text = "Speed: " .. math.floor(s) if LP.Character and LP.Character.Humanoid then LP.Character.Humanoid.WalkSpeed = s end end
+spdS.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then updateSpeed(i) local c c = i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.Change then updateSpeed(i) elseif i.UserInputState == Enum.UserInputState.End then c:Disconnect() end end) end end)
+LP.CharacterAdded:Connect(function(c) c:WaitForChild("Humanoid").WalkSpeed = tonumber(spdL.Text:match("%d+")) or 16 end)
+
+esp.MouseButton1Click:Connect(toggleESP)
+fly.MouseButton1Click:Connect(toggleFly)
