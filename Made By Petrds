@@ -5,15 +5,40 @@ local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local frame = Instance.new("Frame", gui)
 local espBtn = Instance.new("TextButton", frame)
 local flyBtn = Instance.new("TextButton", frame)
+local speedLabel = Instance.new("TextLabel", frame)
+local speedSlider = Instance.new("TextButton", frame)
 local espOn = false
 local flyOn = false
 local hl = {}
 local flyConn
+local dragging, dragStart, startPos
 
-frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 80), UDim2.new(0.5, -75, 0.5, -40), Color3.new(0.2, 0.2, 0.2)
+-- GUI Setup
+frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 120), UDim2.new(0.5, -75, 0.5, -60), Color3.new(0.2, 0.2, 0.2)
+frame.Active, frame.Draggable = true, true
+
 espBtn.Size, espBtn.Position, espBtn.Text, espBtn.BackgroundColor3, espBtn.TextColor3 = UDim2.new(0, 65, 0, 30), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextColor3 = UDim2.new(0, 65, 0, 30), UDim2.new(0, 75, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
+speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3 = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1)
+speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3 = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1)
 
+-- Draggable GUI
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging, dragStart, startPos = true, input.Position, frame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+frame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- ESP Functions
 local function addHL(char)
     if not hl[char] then
         local h = Instance.new("Highlight", char)
@@ -21,24 +46,15 @@ local function addHL(char)
         hl[char] = h
     end
 end
-
 local function remHL(char)
-    if hl[char] then
-        hl[char]:Destroy()
-        hl[char] = nil
-    end
+    if hl[char] then hl[char]:Destroy() hl[char] = nil end
 end
-
 local function toggleESP()
     espOn = not espOn
     espBtn.Text = espOn and "ESP: ON" or "ESP: OFF"
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character then
-            if espOn then
-                addHL(p.Character)
-            else
-                remHL(p.Character)
-            end
+            if espOn then addHL(p.Character) else remHL(p.Character) end
         end
     end
     if espOn then
@@ -49,13 +65,12 @@ local function toggleESP()
             end
         end)
         for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LP then
-                p.CharacterAdded:Connect(function(c) if espOn then addHL(c) end end)
-            end
+            if p ~= LP then p.CharacterAdded:Connect(function(c) if espOn then addHL(c) end end) end
         end
     end
 end
 
+-- Fly Functions
 local function startFly()
     local c = LP.Character
     if not c or not c.HumanoidRootPart then return end
@@ -76,7 +91,6 @@ local function startFly()
         bv.Velocity, bg.CFrame = dir * 50, cam.CFrame
     end)
 end
-
 local function stopFly()
     if flyConn then flyConn:Disconnect() flyConn = nil end
     local c = LP.Character
@@ -86,7 +100,6 @@ local function stopFly()
         if r:FindFirstChild("BodyGyro") then r.BodyGyro:Destroy() end
     end
 end
-
 local function toggleFly()
     flyOn = not flyOn
     flyBtn.Text = flyOn and "Fly: ON" or "Fly: OFF"
@@ -98,5 +111,33 @@ local function toggleFly()
     end
 end
 
+-- Speed Slider
+local function updateSpeed(input)
+    local sliderPos = math.clamp((input.Position.X - speedSlider.AbsolutePosition.X) / speedSlider.AbsoluteSize.X, 0, 1)
+    local speed = 16 + (sliderPos * 84) -- 16 to 100
+    speedLabel.Text = "Speed: " .. math.floor(speed)
+    if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+        LP.Character.Humanoid.WalkSpeed = speed
+    end
+end
+speedSlider.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        updateSpeed(input)
+        local conn
+        conn = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.Change then
+                updateSpeed(input)
+            elseif input.UserInputState == Enum.UserInputState.End then
+                conn:Disconnect()
+            end
+        end)
+    end
+end)
+LP.CharacterAdded:Connect(function(c)
+    local h = c:WaitForChild("Humanoid")
+    h.WalkSpeed = tonumber(speedLabel.Text:match("%d+")) or 16
+end)
+
+-- Button Connections
 espBtn.MouseButton1Click:Connect(toggleESP)
 flyBtn.MouseButton1Click:Connect(toggleFly)
