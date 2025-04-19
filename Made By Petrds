@@ -7,6 +7,8 @@ local espBtn = Instance.new("TextButton", frame)
 local flyBtn = Instance.new("TextButton", frame)
 local speedLabel = Instance.new("TextLabel", frame)
 local speedSlider = Instance.new("TextButton", frame)
+local flingBox = Instance.new("TextBox", frame)
+local flingBtn = Instance.new("TextButton", frame)
 local espOn = false
 local flyOn = false
 local hl = {}
@@ -14,13 +16,15 @@ local flyConn
 local dragging, dragStart, startPos
 
 -- GUI Setup
-frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 120), UDim2.new(0.5, -75, 0.5, -60), Color3.new(0.2, 0.2, 0.2)
+frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 170), UDim2.new(0.5, -75, 0.5, -85), Color3.new(0.2, 0.2, 0.2)
 frame.Active, frame.Draggable = true, true
 
 espBtn.Size, espBtn.Position, espBtn.Text, espBtn.BackgroundColor3, espBtn.TextColor3 = UDim2.new(0, 65, 0, 30), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextColor3 = UDim2.new(0, 65, 0, 30), UDim2.new(0, 75, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3 = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1)
 speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3 = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1)
+flingBox.Size, flingBox.Position, flingBox.Text, flingBox.BackgroundColor3, flingBox.TextColor3, flingBox.PlaceholderText = UDim2.new(0, 90, 0, 30), UDim2.new(0, 10, 0, 110), "", Color3.new(0.3, 0.3, 0.3), Color3.new(1, 1, 1), "Player Name"
+flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3 = UDim2.new(0, 30, 0, 30), UDim2.new(0, 110, 0, 110), "Fling", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1)
 
 -- Draggable GUI
 frame.InputBegan:Connect(function(input)
@@ -138,6 +142,37 @@ LP.CharacterAdded:Connect(function(c)
     h.WalkSpeed = tonumber(speedLabel.Text:match("%d+")) or 16
 end)
 
+-- Fling Function
+local function flingPlayer()
+    local targetName = flingBox.Text
+    local targetPlayer = Players:FindFirstChild(targetName)
+    if not targetPlayer then
+        flingBox.Text = "Player not found"
+        wait(1)
+        flingBox.Text = ""
+        return
+    end
+    if targetPlayer == LP then
+        flingBox.Text = "Cannot fling self"
+        wait(1)
+        flingBox.Text = ""
+        return
+    end
+    local targetChar = targetPlayer.Character
+    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then
+        flingBox.Text = "No character"
+        wait(1)
+        flingBox.Text = ""
+        return
+    end
+    local root = targetChar.HumanoidRootPart
+    local bv = Instance.new("BodyVelocity", root)
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bv.Velocity = Vector3.new(0, 1000, 0) -- Strong upward force
+    game:GetService("Debris"):AddItem(bv, 0.1) -- Remove after 0.1 seconds
+end
+
 -- Button Connections
 espBtn.MouseButton1Click:Connect(toggleESP)
 flyBtn.MouseButton1Click:Connect(toggleFly)
+flingBtn.MouseButton1Click:Connect(flingPlayer)
