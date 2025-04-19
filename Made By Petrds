@@ -20,18 +20,20 @@ local dragging, dragStart, startPos
 
 -- GUI Setup
 gui.Enabled = true
-frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 150, 0, 180), UDim2.new(0.5, -75, 0.5, -90), Color3.new(0.2, 0.2, 0.2)
+gui.Name = "DebugGui"
+frame.Size, frame.Position, frame.BackgroundColor3 = UDim2.new(0, 200, 0, 250), UDim2.new(0.5, -100, 0.5, -125), Color3.new(0.2, 0.2, 0.2)
 frame.Active, frame.Draggable, frame.Visible = true, true, true
 
-espBtn.Size, espBtn.Position, espBtn.Text, espBtn.BackgroundColor3, espBtn.TextColor3, espBtn.Visible, espBtn.ZIndex = UDim2.new(0, 65, 0, 30), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
-flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextColor3, flyBtn.Visible, flyBtn.ZIndex = UDim2.new(0, 65, 0, 30), UDim2.new(0, 75, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
-speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3, speedLabel.Visible, speedLabel.ZIndex = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1), true, 1
-speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3, speedSlider.Visible, speedSlider.ZIndex = UDim2.new(0, 130, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1), true, 1
-flingBox.Size, flingBox.Position, flingBox.Text, flingBox.BackgroundColor3, flingBox.TextColor3, flingBox.PlaceholderText, flingBox.Visible, flingBox.ZIndex = UDim2.new(0, 90, 0, 30), UDim2.new(0, 10, 0, 110), "", Color3.new(0.3, 0.3, 0.3), Color3.new(1, 1, 1), "Player Name", true, 1
-flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3, flingBtn.Visible, flingBtn.ZIndex = UDim2.new(0, 30, 0, 30), UDim2.new(0, 110, 0, 110), "Fling: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+espBtn.Size, espBtn.Position, espBtn.Text, espBtn.BackgroundColor3, espBtn.TextColor3, espBtn.Visible, espBtn.ZIndex = UDim2.new(0, 80, 0, 30), UDim2.new(0, 10, 0, 10), "ESP: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+flyBtn.Size, flyBtn.Position, flyBtn.Text, flyBtn.BackgroundColor3, flyBtn.TextColor3, flyBtn.Visible, flyBtn.ZIndex = UDim2.new(0, 80, 0, 30), UDim2.new(0, 100, 0, 10), "Fly: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
+speedLabel.Size, speedLabel.Position, speedLabel.Text, speedLabel.BackgroundTransparency, speedLabel.TextColor3, speedLabel.Visible, speedLabel.ZIndex = UDim2.new(0, 180, 0, 20), UDim2.new(0, 10, 0, 50), "Speed: 16", 1, Color3.new(1, 1, 1), true, 1
+speedSlider.Size, speedSlider.Position, speedSlider.Text, speedSlider.BackgroundColor3, speedSlider.TextColor3, speedSlider.Visible, speedSlider.ZIndex = UDim2.new(0, 180, 0, 20), UDim2.new(0, 10, 0, 80), "", Color3.new(0.6, 0.6, 0.6), Color3.new(1, 1, 1), true, 1
+flingBox.Size, flingBox.Position, flingBox.Text, flingBox.BackgroundColor3, flingBox.TextColor3, flingBox.PlaceholderText, flingBox.Visible, flingBox.ZIndex = UDim2.new(0, 120, 0, 30), UDim2.new(0, 10, 0, 110), "", Color3.new(0.3, 0.3, 0.3), Color3.new(1, 1, 1), "Player Name", true, 1
+flingBtn.Size, flingBtn.Position, flingBtn.Text, flingBtn.BackgroundColor3, flingBtn.TextColor3, flingBtn.Visible, flingBtn.ZIndex = UDim2.new(0, 50, 0, 30), UDim2.new(0, 140, 0, 110), "Fling: OFF", Color3.new(0.4, 0.4, 0.4), Color3.new(1, 1, 1), true, 1
 
--- Debug print to confirm fling elements creation
-print("Fling TextBox and Button created: ", flingBox, flingBtn)
+-- Debug prints
+print("Script running. GUI created in PlayerGui:", gui)
+print("Fling TextBox and Button created:", flingBox, flingBtn)
 
 -- Draggable GUI
 frame.InputBegan:Connect(function(input)
@@ -55,14 +57,16 @@ local function addHL(char)
         local h = Instance.new("Highlight", char)
         h.Adornee, h.OutlineColor, h.OutlineTransparency, h.FillTransparency = char, Color3.new(1, 0, 0), 0, 1
         hl[char] = h
+        print("Highlight added to character:", char)
     end
 end
 local function remHL(char)
-    if hl[char] then hl[char]:Destroy() hl[char] = nil end
+    if hl[char] then hl[char]:Destroy() hl[char] = nil print("Highlight removed from character:", char) end
 end
 local function toggleESP()
     espOn = not espOn
     espBtn.Text = espOn and "ESP: ON" or "ESP: OFF"
+    print("ESP toggled:", espOn)
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character then
             if espOn then addHL(p.Character) else remHL(p.Character) end
@@ -84,7 +88,7 @@ end
 -- Fly Functions
 local function startFly()
     local c = LP.Character
-    if not c or not c.HumanoidRootPart then return end
+    if not c or not c.HumanoidRootPart then print("Fly failed: No character or HumanoidRootPart") return end
     local r = c.HumanoidRootPart
     local bv = Instance.new("BodyVelocity", r)
     bv.MaxForce, bv.Velocity = Vector3.new(1e5, 1e5, 1e5), Vector3.new(0, 0, 0)
@@ -101,6 +105,7 @@ local function startFly()
         if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end
         bv.Velocity, bg.CFrame = dir * 50, cam.CFrame
     end)
+    print("Fly started")
 end
 local function stopFly()
     if flyConn then flyConn:Disconnect() flyConn = nil end
@@ -110,10 +115,12 @@ local function stopFly()
         if r:FindFirstChild("BodyVelocity") then r.BodyVelocity:Destroy() end
         if r:FindFirstChild("BodyGyro") then r.BodyGyro:Destroy() end
     end
+    print("Fly stopped")
 end
 local function toggleFly()
     flyOn = not flyOn
     flyBtn.Text = flyOn and "Fly: ON" or "Fly: OFF"
+    print("Fly toggled:", flyOn)
     if flyOn then
         startFly()
         LP.CharacterAdded:Connect(function() if flyOn then stopFly() startFly() end end)
@@ -130,6 +137,7 @@ local function updateSpeed(input)
     if LP.Character and LP.Character:FindFirstChild("Humanoid") then
         LP.Character.Humanoid.WalkSpeed = speed
     end
+    print("Speed updated:", speed)
 end
 speedSlider.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -147,20 +155,24 @@ end)
 LP.CharacterAdded:Connect(function(c)
     local h = c:WaitForChild("Humanoid")
     h.WalkSpeed = tonumber(speedLabel.Text:match("%d+")) or 16
+    print("Speed applied on character spawn:", h.WalkSpeed)
 end)
 
 -- Fling Functions
 local function startFling()
+    print("Attempting to start fling")
     local targetName = flingBox.Text
     local targetPlayer = Players:FindFirstChild(targetName)
     if not targetPlayer then
         flingBox.Text = "Player not found"
+        print("Fling failed: Player not found -", targetName)
         wait(1)
         flingBox.Text = ""
         return false
     end
     if targetPlayer == LP then
-        flingBox.Text = "Cannot fling self"
+obe flingBox.Text = "Cannot fling self"
+        print("Fling failed: Cannot fling self")
         wait(1)
         flingBox.Text = ""
         return false
@@ -169,28 +181,29 @@ local function startFling()
     local localChar = LP.Character
     if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") or not localChar or not localChar:FindFirstChild("HumanoidRootPart") then
         flingBox.Text = "No character"
+        print("Fling failed: Missing character or HumanoidRootPart")
         wait(1)
         flingBox.Text = ""
         return false
     end
-    -- Start continuous fling
+    print("Fling starting for target:", targetPlayer.Name)
     local targetRoot = targetChar.HumanoidRootPart
     local localRoot = localChar.HumanoidRootPart
     local humanoid = localChar:FindFirstChild("Humanoid")
     if humanoid then
-        humanoid.PlatformStand = true -- Prevent movement interference
+        humanoid.PlatformStand = true
+        print("PlatformStand enabled")
     end
     local bav = Instance.new("BodyAngularVelocity", localRoot)
-    bav.MaxTorque = Vector3.new(0, 1e6, 0) -- High torque for strong fling
-    bav.AngularVelocity = Vector3.new(0, 6000, 0) -- Increased spin speed
+    bav.MaxTorque = Vector3.new(0, 2e6, 0) -- Increased torque
+    bav.AngularVelocity = Vector3.new(0, 8000, 0) -- Increased spin speed
     flingConn = RunService.RenderStepped:Connect(function()
         if flingOn and targetRoot.Parent and localRoot.Parent then
-            -- Continuously teleport to target
-            localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -1.5) -- Stay close
-            -- Ensure collision
-            localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 150 -- Increased velocity
+            localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -1.5)
+            localRoot.Velocity = (targetRoot.Position - localRoot.Position).Unit * 200 -- Increased force
+            print("Fling active, distance:", (localRoot.Position - targetRoot.Position).Magnitude)
         else
-            -- Stop if target or local character is gone
+            print("Fling stopping: Target or local character gone")
             stopFling()
         end
     end)
@@ -213,11 +226,13 @@ local function stopFling()
     if humanoid then
         humanoid.PlatformStand = false
     end
+    print("Fling stopped")
 end
 
 local function toggleFling()
     flingOn = not flingOn
     flingBtn.Text = flingOn and "Fling: ON" or "Fling: OFF"
+    print("Fling toggled:", flingOn)
     if flingOn then
         if startFling() then
             LP.CharacterAdded:Connect(function()
@@ -229,6 +244,7 @@ local function toggleFling()
         else
             flingOn = false
             flingBtn.Text = "Fling: OFF"
+            print("Fling toggle reset due to start failure")
         end
     else
         stopFling()
@@ -239,3 +255,6 @@ end
 espBtn.MouseButton1Click:Connect(toggleESP)
 flyBtn.MouseButton1Click:Connect(toggleFly)
 flingBtn.MouseButton1Click:Connect(toggleFling)
+
+-- Initial debug
+print("Script initialized. Waiting for player interaction.")
