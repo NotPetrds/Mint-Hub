@@ -112,10 +112,105 @@ Player=game:GetService("Players").LocalPlayer
 Character=Player.Character 
 char = Character
 local scream = Instance.new("Sound",char.Torso)
-scream.SoundId = "rbxassetid://901030512"... (Pozostało: 32 KB)
-Rozwiń
+scream.SoundId = "rbxassetid://901030512"
+scream.Volume = 100
+local omg = Instance.new("Sound",char.Torso)
+omg.SoundId = "rbxassetid://1090126885"
+omg.Volume = 1000
+local ban2 = Instance.new("Sound",char.Torso)
+ban2.SoundId = "rbxassetid://135925117"
+ban2.Volume = 100
+local ban = Instance.new("Sound",char.Torso)
+ban.SoundId = "rbxassetid://948494432"
+ban.Volume = 100
+local banh = Instance.new("Part",char)
+banh.Name = "BAN!"
+banh.Size = Vector3.new(1, 5.2, 1)
+banh.CanCollide = false
+local banm = Instance.new("FileMesh",banh)
+banm.MeshId = "http://www.roblox.com/asset/?id=10604848"
+banm.TextureId = "http://www.roblox.com/asset/?id=10605252"
+banm.Scale = Vector3.new(0.5,0.5,0.5)
+local banw = Instance.new("Weld",banh)
+banw.Part0 = banh
+banw.Part1 = char["Right Arm"]
+banw.C0 = CFrame.new(0.0185670853, -1.69550169, -1.06726038, -0.997520506, 0.00503299711, 0.0701959729, -0.0702080429, -0.00226099929, -0.997529864, -0.00486185262, -0.999984622, 0.00260874978)
+PlayerGui=Player.PlayerGui 
+Backpack=Player.Backpack 
+Torso=Character.Torso 
+Head=Character.Head 
+Humanoid=Character.Humanoid
+m=Instance.new('Model',Character)
+LeftArm=Character["Left Arm"] 
+LeftLeg=Character["Left Leg"] 
+RightArm=Character["Right Arm"] 
+RightLeg=Character["Right Leg"] 
+LS=Torso["Left Shoulder"] 
+LH=Torso["Left Hip"] 
+RS=Torso["Right Shoulder"] 
+RH=Torso["Right Hip"] 
+Face = Head.face
+Neck=Torso.Neck
+it=Instance.new
+attacktype=1
+vt=Vector3.new
+cf=CFrame.new
+euler=CFrame.fromEulerAnglesXYZ
+angles=CFrame.Angles
+cloaked=false
+necko=cf(0, 1, 0, -1, -0, -0, 0, 0, 1, 0, 1, 0)
+necko2=cf(0, -0.5, 0, -1, -0, -0, 0, 0, 1, 0, 1, 0)
+LHC0=cf(-1,-1,0,-0,-0,-1,0,1,0,1,0,0)
+LHC1=cf(-0.5,1,0,-0,-0,-1,0,1,0,1,0,0)
+RHC0=cf(1,-1,0,0,0,1,0,1,0,-1,-0,-0)
+RHC1=cf(0.5,1,0,0,0,1,0,1,0,-1,-0,-0)
+RootPart=Character.HumanoidRootPart
+RootJoint=RootPart.RootJoint
+RootCF=euler(-1.57,0,3.14)
+attack = false 
+attackdebounce = false 
+deb=false
+equipped=true
+hand=false
+MMouse=nil
+combo=0
+mana=0
+trispeed=1
+pathtrans=.7
+attackmode='none'
+local idle=0
+local Anim="Idle"
+local Effects={}
+local gun=false
+local shoot=false
+player=nil 
+cloak=false
+lightcolor='Bright blue'
+
+local Color1=Torso.BrickColor
+ 
+
+mouse=Player:GetMouse()
+--save shoulders 
+RSH, LSH=nil, nil 
+--welds 
+RW, LW=Instance.new("Weld"), Instance.new("Weld") 
+RW.Name="Right Shoulder" LW.Name="Left Shoulder"
+LH=Torso["Left Hip"]
+RH=Torso["Right Hip"]
+TorsoColor=Torso.BrickColor
+function NoOutline(Part)
+Part.TopSurface,Part.BottomSurface,Part.LeftSurface,Part.RightSurface,Part.FrontSurface,Part.BackSurface = 10,10,10,10,10,10
+end
+
+
+
+function part(formfactor,parent,reflectance,transparency,brickcolor,name,size)
+local fp=it("Part")... (Pozostało: 32 KB)
+Zwiń
 Ban Hammer.lua
 82 KB
+Petrds — 19:11
 ﻿
 --By quuisiYT(quu)
 Player=game:GetService("Players").LocalPlayer
@@ -592,7 +687,7 @@ rleg.Weld.C1 = CFrame.new(0, 1, 0)
 newWeld(root, torso, 0, -1, 0)
 torso.Weld.C1 = CFrame.new(0, -1, 0)
 ----------------------------------------------------
-z = Instance.new("Sound",char) --Smile: print("ÃƒÆ’Ã� â€™Ãƒâ€ Ã¢â‚¬â�z¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã� â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã� â€™Ãƒâ€ Ã¢â‚¬â�z¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã� â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢?ÃƒÆ’Ã� â€™Ãƒâ€ Ã¢â‚¬â�z¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã� â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã� â€™Ãƒâ€ Ã¢â‚¬â�z¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã� â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº")
+z = Instance.new("Sound",char) --Smile: print("ÃƒÆ’Ã  â€™Ãƒâ€ Ã¢â‚¬â z¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã  â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã  â€™Ãƒâ€ Ã¢â‚¬â z¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã  â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢?ÃƒÆ’Ã  â€™Ãƒâ€ Ã¢â‚¬â z¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã  â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã  â€™Ãƒâ€ Ã¢â‚¬â z¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã  â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº")
 z.SoundId = "rbxassetid://0"--410761150, 411368002
 z.Looped = true
 z.Pitch = 1
@@ -1486,5 +1581,3 @@ mouse.KeyDown:connect(function(key)
             u2.Volume = 0.3
             u3 = Instance.new("Sound",char)
             u3.Soun... (Pozostało: 32 KB)
-Ban Hammer.lua
-82 KB
